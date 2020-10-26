@@ -94,6 +94,11 @@ pub fn main() -> Result<(), JsValue> {
 pub fn greet() {
     alert("Hello, brick-tankgame!");
 }
+#[derive(Clone)]
+enum Cell{
+    Alive,
+    Dead
+}
 
 #[wasm_bindgen]
 struct block{
@@ -101,6 +106,7 @@ struct block{
     canvas:web_sys::HtmlCanvasElement,
     width:u32,
     height:u32,
+    array:Vec<Cell>
 }
 
 #[wasm_bindgen]
@@ -119,12 +125,24 @@ impl block{
         let height=window.inner_height().unwrap();
         let uwidth=width.as_f64().unwrap();
         let uheight=height.as_f64().unwrap();
-      
+        let uwidth:u32=(uwidth as u32)/10u32;
+        let uheight:u32=(uheight as u32)/10u32;
+        let mut ar:Vec<Cell>=Vec::new();
+        for y in 0..uheight*uwidth{
+        //    if(y%2==0){
+            ar.push(Cell::Dead);
+        //    }
+        //    else{
+            //    ar.push(Cell::Alive);
+        //    }
+        }
+
         Self{
             window:windows,
             canvas:canvass,
             width:uwidth as u32,
             height:uheight as u32,
+            array:ar
 
         }
     }
@@ -160,8 +178,23 @@ impl block{
     
         context.fill_rect(0.0, 0.0, uwidth, uheight);
         context.set_fill_style(&"#000000".into());        
-    
-        context.fill_rect(20.0, 20.0, 10f64, 10f64);
-        context.fill_rect(20.0, 31.0, 10f64, 10f64);
+        
+        for y in 0..self.height{
+            for x in 0..self.width{
+            //   let k:Cell= self.array[(x*y)as usize].Clone();
+                if let Cell::Alive=self.array[(x*y)as usize]{
+                    context.set_fill_style(&"#000000".into());        
+                    context.fill_rect((10.0*x as f64)+1f64, (10.0 *y as f64)+1f64, 9f64, 9f64);
+                }
+                else{
+                    context.set_fill_style(&"#4e825f".into());
+                    context.fill_rect((10.0*x as f64)+1f64, (10.0 *y as f64)+1f64, 9f64, 9f64);
+                }
+               
+            }
+        }
+
+        // context.fill_rect(20.0, 20.0, 10f64, 10f64);
+        // context.fill_rect(20.0, 31.0, 10f64, 10f64);
     }
 }
