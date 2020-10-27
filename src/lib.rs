@@ -106,7 +106,22 @@ struct block{
     canvas:web_sys::HtmlCanvasElement,
     width:u32,
     height:u32,
-    array:Vec<Cell>
+    array:Vec<Cell>,
+    tanks:Vec<Tanker>
+}
+
+struct Tanker{
+    body: Vec<u32>,
+    bullet:Vec<u32>,
+}
+
+impl Tanker{
+    pub fn new(pos:u32,width:u32,height:u32)->Self{
+        Self{
+            body:vec![pos,pos-1,pos+1,pos+width,pos-width,(pos-2)+width,(pos-2)-width],
+            bullet:vec![]
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -142,14 +157,23 @@ impl block{
             canvas:canvass,
             width:uwidth as u32,
             height:uheight as u32,
-            array:ar
+            array:ar,
+            tanks:vec![Tanker::new(100,uwidth as u32,uheight as u32),Tanker::new(350,uwidth as u32,uheight as u32)]
 
         }
     }
 
 
-    pub fn draw_block(&self){
-       
+    pub fn draw_blocked(&mut self){
+       for k in 0..self.array.len(){
+            self.array[k]=Cell::Dead;
+       }
+
+       for k in 0..self.tanks.len(){
+           for j in 0..self.tanks[k].body.len(){
+             self.array[self.tanks[k].body[j] as usize]=Cell::Alive;
+           }
+        }
     
     }
 
