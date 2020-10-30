@@ -109,16 +109,18 @@ struct block{
     array:Vec<Cell>,
     tanks:Vec<Tanker>
 }
-
+#[wasm_bindgen]
 struct Tanker{
+    x:usize,
     body: Vec<u32>,
     bullet:Vec<u32>,
 }
-
+#[wasm_bindgen]
 impl Tanker{
     pub fn new(pos:u32,width:u32,height:u32)->Self{
         Self{
-            body:vec![pos,pos-1,pos+1,pos+width,pos-width,(pos-2)+width,(pos-2)-width],
+            x:pos as usize,
+            body:vec![pos,pos-1,pos+1],
             bullet:vec![]
         }
     }
@@ -148,7 +150,7 @@ impl block{
             ar.push(Cell::Dead);
         //    }
         //    else{
-            //    ar.push(Cell::Alive);
+        //        ar.push(Cell::Alive);
         //    }
         }
 
@@ -158,22 +160,34 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(100,uwidth as u32,uheight as u32),Tanker::new(350,uwidth as u32,uheight as u32)]
+            tanks:vec![Tanker::new(100,uwidth as u32,uheight as u32),Tanker::new(34,uwidth as u32,uheight as u32)]
 
         }
     }
 
 
-    pub fn draw_blocked(&mut self){
-       for k in 0..self.array.len(){
-            self.array[k]=Cell::Dead;
-       }
+    pub fn draw(&mut self){
+    
+    // self.array.clear();
+    for k in 0..self.array.len(){
+        self.array[k]=Cell::Dead;
+   }
 
-       for k in 0..self.tanks.len(){
-           for j in 0..self.tanks[k].body.len(){
-             self.array[self.tanks[k].body[j] as usize]=Cell::Alive;
-           }
-        }
+   for k in self.tanks.iter(){
+       for j in k.body.iter(){
+           console_log!("values tanks {}",*j);
+         self.array[*j as usize]=Cell::Alive;
+       }
+    // self.array[self.tanks[k].x]=Cell::Alive;
+    }
+    // for y in 0..self.height*self.width{
+    //        if(y%2==0){
+    //         self.array.push(Cell::Dead);
+    //        }
+    //        else{
+    //         self.array.push(Cell::Alive);
+    //        }
+    //     }
     
     }
 
