@@ -2,6 +2,8 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use gloo::{events::EventListener};
+
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -36,21 +38,23 @@ pub fn main() -> Result<(), JsValue> {
     // let canvas=documen
     // Manufacture the element we're gonna append
     let val = document.create_element("canvas")?;
-    let canvas = document.get_element_by_id("canvas").unwrap();
+    let canvass = document.get_element_by_id("canvas").unwrap();
     // val.set_inner_html("Hello from Rust!");
 
     // body.append_child(&val)?;
-    let canvas: web_sys::HtmlCanvasElement = canvas
+    let canvas: web_sys::HtmlCanvasElement = canvass
     .dyn_into::<web_sys::HtmlCanvasElement>()
     .map_err(|_| ())
     .unwrap();
+
+ 
 
     let windows: web_sys::Window =web_sys::window().unwrap();
     let width=windows.inner_width()?;
     let height=windows.inner_height()?;
     let uwidth=width.as_f64().unwrap();
     let uheight=height.as_f64().unwrap();
-    console_log!("createdddd module has {}  {} pages of memory",uwidth,uheight );
+    // console_log!("createdddd module has {}  {} pages of memory",uwidth,uheight );
     let context = canvas
     .get_context("2d")
     .unwrap()
@@ -75,7 +79,7 @@ pub fn main() -> Result<(), JsValue> {
             y1+=20.0;
             context.set_fill_style(&"#076ab0".into());
             context.fill_rect(y1, x1 , 100f64,100f64);
-            console_log!("xxxxx yyyyy xxxxxx");
+            // console_log!("xxxxx yyyyy xxxxxx");
     
     // for i in 1..5{
     //     let temp=(i*100)as f64;
@@ -120,8 +124,14 @@ impl Tanker{
     pub fn new(pos:u32,width:u32,height:u32)->Self{
         Self{
             x:pos as usize,
-            body:vec![pos,pos-1,pos+1],
+            body:vec![pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1],
             bullet:vec![]
+        }
+    }
+
+    pub fn tank_move(&mut self){
+        for blk in self.body.iter_mut(){
+            *blk+=1; 
         }
     }
 }
@@ -134,6 +144,30 @@ impl block{
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
         let canvas = document.get_element_by_id("canvas").unwrap();
+
+        let closure = Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
+           console_log!("hello world");
+        }) as Box<dyn FnMut(_)>);
+
+
+        // let on_keydown = EventListener::new(&canvas, "keydown", move |event| {
+
+        //     let keyboard_event = event.clone()
+        //                         .dyn_into::<web_sys::KeyboardEvent>()
+        //                         .unwrap();
+        
+        //             let mut event_string = String::from("");
+        //             event_string.push_str(&event.type_());
+        //             event_string.push_str(&" : ");
+        //             event_string.push_str(&keyboard_event.key());
+                    
+                
+            
+        //     });
+            canvas.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+            closure.forget(); 
+            // on_keydown.forget(); 
+        
         let canvass: web_sys::HtmlCanvasElement = canvas
         .dyn_into::<web_sys::HtmlCanvasElement>()
         .map_err(|_| ())
@@ -145,6 +179,10 @@ impl block{
         let uwidth:u32=(uwidth as u32)/10u32;
         let uheight:u32=(uheight as u32)/10u32;
         let mut ar:Vec<Cell>=Vec::new();
+
+ 
+
+
         for y in 0..uheight*uwidth{
         //    if(y%2==0){
             ar.push(Cell::Dead);
@@ -160,7 +198,7 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(100,uwidth as u32,uheight as u32),Tanker::new(34,uwidth as u32,uheight as u32)]
+            tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(200,uwidth as u32,uheight as u32)]
 
         }
     }
@@ -169,13 +207,20 @@ impl block{
     pub fn draw(&mut self){
     
     // self.array.clear();
-    for k in 0..self.array.len(){
-        self.array[k]=Cell::Dead;
-   }
+    for k in self.tanks.iter(){
+        for j in k.body.iter(){
+         //    console_log!("values tanks {}",*j);
+          self.array[*j as usize]=Cell::Dead;
+        }
+     // self.array[self.tanks[k].x]=Cell::Alive;
+     }
+    for ik in self.tanks.iter_mut(){
+        ik.tank_move();
+    }
 
    for k in self.tanks.iter(){
        for j in k.body.iter(){
-           console_log!("values tanks {}",*j);
+        //    console_log!("values tanks {}",*j);
          self.array[*j as usize]=Cell::Alive;
        }
     // self.array[self.tanks[k].x]=Cell::Alive;
@@ -203,7 +248,7 @@ impl block{
         let height=self.window.inner_height().unwrap();
         let uwidth=width.as_f64().unwrap();
         let uheight=height.as_f64().unwrap();
-        console_log!("createdddd module has {}  {} pages of memory",uwidth,uheight );
+        // console_log!("createdddd module has {}  {} pages of memory",uwidth,uheight );
         let context = self.canvas
         .get_context("2d")
         .unwrap()
@@ -217,18 +262,16 @@ impl block{
         context.fill_rect(0.0, 0.0, uwidth, uheight);
         context.set_fill_style(&"#000000".into());        
         
-        for y in 0..self.height{
-            for x in 0..self.width{
-            //   let k:Cell= self.array[(x*y)as usize].Clone();
-                if let Cell::Alive=self.array[(x*y)as usize]{
-                    context.set_fill_style(&"#000000".into());        
-                    context.fill_rect((10.0*x as f64)+1f64, (10.0 *y as f64)+1f64, 9f64, 9f64);
-                }
-                else{
-                    context.set_fill_style(&"#4e825f".into());
-                    context.fill_rect((10.0*x as f64)+1f64, (10.0 *y as f64)+1f64, 9f64, 9f64);
-                }
-               
+
+        for ii in 0..self.array.len(){
+            if let Cell::Alive=self.array[ii]{
+                // console_log!("values tanks {} {} {}",ii,(ii%self.width  as usize),(ii%self.height as usize));
+                context.set_fill_style(&"#000000".into());        
+                context.fill_rect((10.0*(ii%self.width  as usize) as f64)+1f64, (10.0 *(ii/self.width as usize) as f64)+1f64, 9f64, 9f64);
+            }
+            else{
+                context.set_fill_style(&"#4e825f".into());
+                context.fill_rect((10.0*(ii%self.width as usize) as f64)+1f64, (10.0 *(ii/self.width as usize) as f64)+1f64, 9f64, 9f64);
             }
         }
 

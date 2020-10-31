@@ -14,6 +14,7 @@ default = ["console_error_panic_hook"]
 wasm-bindgen = "0.2.63"
 serde = "^1.0.101"
 serde_derive = "^1.0.101"
+gloo = "0.2.0"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -46,5 +47,6 @@ features = [
   'console',
   'HtmlCanvasElement',
   'CanvasRenderingContext2d',
+  'KeyboardEvent'
 ]
 
