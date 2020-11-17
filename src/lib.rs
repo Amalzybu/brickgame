@@ -90,7 +90,6 @@ pub fn main() -> Result<(), JsValue> {
 
 
 
-
     Ok(())
 }
 
@@ -111,7 +110,8 @@ struct block{
     width:u32,
     height:u32,
     array:Vec<Cell>,
-    tanks:Vec<Tanker>
+    tanks:Vec<Tanker>,
+    hero:Tanker
 }
 #[wasm_bindgen]
 struct Tanker{
@@ -131,9 +131,21 @@ impl Tanker{
 
     pub fn tank_move(&mut self){
         for blk in self.body.iter_mut(){
+         
             *blk+=1; 
         }
     }
+
+    pub fn change_direction(&mut self,p:u32){
+        if p==68{
+           let pos:&u32= self.body.first().unwrap();
+           self.body.clear();
+           self.body.push(*pos)
+
+        }
+
+    }
+
 }
 
 #[wasm_bindgen]
@@ -147,31 +159,19 @@ impl block{
 
         let closure = Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
            console_log!("hello world");
+           
         }) as Box<dyn FnMut(_)>);
 
 
-        // let on_keydown = EventListener::new(&canvas, "keydown", move |event| {
-
-        //     let keyboard_event = event.clone()
-        //                         .dyn_into::<web_sys::KeyboardEvent>()
-        //                         .unwrap();
-        
-        //             let mut event_string = String::from("");
-        //             event_string.push_str(&event.type_());
-        //             event_string.push_str(&" : ");
-        //             event_string.push_str(&keyboard_event.key());
-                    
-                
-            
-        //     });
-            canvas.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
-            closure.forget(); 
-            // on_keydown.forget(); 
+       
         
         let canvass: web_sys::HtmlCanvasElement = canvas
         .dyn_into::<web_sys::HtmlCanvasElement>()
         .map_err(|_| ())
         .unwrap();
+
+        canvass.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+        closure.forget(); 
         let width=window.inner_width().unwrap();
         let height=window.inner_height().unwrap();
         let uwidth=width.as_f64().unwrap();
@@ -198,7 +198,8 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(200,uwidth as u32,uheight as u32)]
+            tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(200,uwidth as u32,uheight as u32)],
+            hero:Tanker::new(600,uwidth as u32,uheight as u32)
 
         }
     }
@@ -214,6 +215,12 @@ impl block{
         }
      // self.array[self.tanks[k].x]=Cell::Alive;
      }
+
+     for j in self.hero.body.iter(){
+        //    console_log!("values tanks {}",*j);
+         self.array[*j as usize]=Cell::Dead;
+       }
+
     for ik in self.tanks.iter_mut(){
         ik.tank_move();
     }
@@ -225,6 +232,11 @@ impl block{
        }
     // self.array[self.tanks[k].x]=Cell::Alive;
     }
+
+    for j in self.hero.body.iter(){
+        //    console_log!("values tanks {}",*j);
+         self.array[*j as usize]=Cell::Alive;
+       }
     // for y in 0..self.height*self.width{
     //        if(y%2==0){
     //         self.array.push(Cell::Dead);
@@ -278,4 +290,13 @@ impl block{
         // context.fill_rect(20.0, 20.0, 10f64, 10f64);
         // context.fill_rect(20.0, 31.0, 10f64, 10f64);
     }
+    pub fn mov_dir(&mut self,p:u32){
+        console_log!("direction {}",p);
+        
+    }
+
+
 }
+
+
+
