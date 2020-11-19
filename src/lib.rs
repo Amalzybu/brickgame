@@ -118,6 +118,8 @@ struct Tanker{
     x:usize,
     body: Vec<u32>,
     bullet:Vec<u32>,
+    width:u32,
+    height:u32,
 }
 #[wasm_bindgen]
 impl Tanker{
@@ -125,7 +127,9 @@ impl Tanker{
         Self{
             x:pos as usize,
             body:vec![pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1],
-            bullet:vec![]
+            bullet:vec![],
+            width:width,
+            height:height,
         }
     }
 
@@ -136,15 +140,7 @@ impl Tanker{
         }
     }
 
-    pub fn change_direction(&mut self,p:u32){
-        if p==68{
-           let pos:&u32= self.body.first().unwrap();
-           self.body.clear();
-           self.body.push(*pos)
-
-        }
-
-    }
+   
 
 }
 
@@ -291,7 +287,19 @@ impl block{
         // context.fill_rect(20.0, 31.0, 10f64, 10f64);
     }
     pub fn mov_dir(&mut self,p:u32){
-        console_log!("direction {}",p);
+        console_log!("direction {}",self.hero.body[1]);
+        // let pos:&u32= self.body.first().unwrap();
+        if p==68{
+        // //    pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1
+           
+           self.hero.body[5]= self.hero.body[0]+self.width+3;
+           self.hero.body[6]= self.hero.body[0]-self.width+3;
+
+        }
+        else if p==65{
+            self.hero.body[5]= self.hero.body[0]+self.width-1;
+            self.hero.body[6]= self.hero.body[0]-self.width-1;
+        }
         
     }
 
