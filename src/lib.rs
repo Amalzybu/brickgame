@@ -103,6 +103,41 @@ enum Cell{
     Dead
 }
 
+#[derive(Clone,Copy)]
+enum Direction{
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+}
+
+
+struct Bullet{
+    direction:Direction,
+    colum:u32,
+    is_alive:bool
+}
+
+impl Bullet{
+    pub fn new(x:u32,dir:Direction)->Self{
+        Self{
+            direction:dir,
+            colum:x,
+            is_alive:true
+        }
+    }
+
+    pub fn move_on(&mut self,width:u32){
+        match self.direction{
+            UP =>{ self.colum-=width},
+            DOWN=>{},
+            LEFT=>{},
+            RIGHT=>{}
+
+        }
+    }
+}
+
 #[wasm_bindgen]
 struct block{
     window:web_sys::Window,
@@ -111,13 +146,14 @@ struct block{
     height:u32,
     array:Vec<Cell>,
     tanks:Vec<Tanker>,
-    hero:Tanker
+    hero:Tanker,
+    old_hero:Tanker,
 }
 #[wasm_bindgen]
 struct Tanker{
     x:usize,
     body: Vec<u32>,
-    bullet:Vec<u32>,
+    bullet:Vec<Bullet>,
     width:u32,
     height:u32,
 }
@@ -195,7 +231,8 @@ impl block{
             height:uheight as u32,
             array:ar,
             tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(200,uwidth as u32,uheight as u32)],
-            hero:Tanker::new(600,uwidth as u32,uheight as u32)
+            hero:Tanker::new(600,uwidth as u32,uheight as u32),
+            old_hero:Tanker::new(600,uwidth as u32,uheight as u32)
 
         }
     }
@@ -216,6 +253,8 @@ impl block{
         //    console_log!("values tanks {}",*j);
          self.array[*j as usize]=Cell::Dead;
        }
+
+    
 
     for ik in self.tanks.iter_mut(){
         ik.tank_move();
@@ -289,17 +328,45 @@ impl block{
     pub fn mov_dir(&mut self,p:u32){
         console_log!("direction {}",self.hero.body[1]);
         // let pos:&u32= self.body.first().unwrap();
-        if p==68{
+        let mut dir=0i32;
+      for i in 0..self.hero.body.len(){
+        self.old_hero.body[i]=self.hero.body[i];
+      }
+        if p==65{
         // //    pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1
            
            self.hero.body[5]= self.hero.body[0]+self.width+3;
            self.hero.body[6]= self.hero.body[0]-self.width+3;
+           dir=-1i32;
 
         }
-        else if p==65{
+        else if p==68{
             self.hero.body[5]= self.hero.body[0]+self.width-1;
             self.hero.body[6]= self.hero.body[0]-self.width-1;
+            dir=1i32;
         }
+        else if p==87{
+            self.hero.body[5]= self.hero.body[0]+2*self.width+2;
+            self.hero.body[6]= self.hero.body[0]+2*self.width;
+            dir=-1i32*(self.width as i32);
+           
+        }
+        else if p==83{
+            self.hero.body[5]= self.hero.body[0]-2*self.width+2;
+            self.hero.body[6]= self.hero.body[0]-2*self.width;
+            dir=self.width as i32;
+        }
+
+        for j in self.old_hero.body.iter(){
+            self.array[*j as usize]=Cell::Dead;
+           }
+
+        for cel in  0..self.hero.body.len(){
+          
+            self.hero.body[cel]+=dir as u32;
+          
+        }
+
         
     }
 
