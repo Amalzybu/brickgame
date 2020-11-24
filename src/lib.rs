@@ -127,9 +127,11 @@ impl Bullet{
         }
     }
 
-    pub fn move_on(&mut self,width:u32){
+    pub fn move_on(&mut self,width:u32,height:u32){
         match self.direction{
-            UP =>{ self.colum-=width},
+            UP =>{
+                 self.colum-=width; 
+            },
             DOWN=>{},
             LEFT=>{},
             RIGHT=>{}
@@ -337,24 +339,38 @@ impl block{
            
            self.hero.body[5]= self.hero.body[0]+self.width+3;
            self.hero.body[6]= self.hero.body[0]-self.width+3;
+           console_log!("val {:?} {}",self.hero.body,self.width);
            dir=-1i32;
 
         }
         else if p==68{
             self.hero.body[5]= self.hero.body[0]+self.width-1;
             self.hero.body[6]= self.hero.body[0]-self.width-1;
+            console_log!("val {:?} {}",self.hero.body,self.width);
             dir=1i32;
         }
         else if p==87{
             self.hero.body[5]= self.hero.body[0]+2*self.width+2;
             self.hero.body[6]= self.hero.body[0]+2*self.width;
-            dir=-1i32*(self.width as i32);
-           
+            console_log!("val {:?} {}",self.hero.body,self.width);
+            if (self.hero.body[4]/self.width)==0{
+                dir=0;
+            }
+            else{
+                dir=-1i32*(self.width as i32);
+            }
         }
         else if p==83{
             self.hero.body[5]= self.hero.body[0]-2*self.width+2;
             self.hero.body[6]= self.hero.body[0]-2*self.width;
-            dir=self.width as i32;
+            console_log!("val {:?} {} {}",self.hero.body,(self.hero.body[3]/self.width),self.height-1);
+            if (self.hero.body[3]/self.width)==self.height-1{
+                dir=0;
+            }
+            else{
+                dir=self.width as i32;
+            }
+           
         }
 
         for j in self.old_hero.body.iter(){
