@@ -339,15 +339,29 @@ impl block{
            
            self.hero.body[5]= self.hero.body[0]+self.width+3;
            self.hero.body[6]= self.hero.body[0]-self.width+3;
-           console_log!("val {:?} {}",self.hero.body,self.width);
-           dir=-1i32;
+           console_log!("val l {:?} {}",self.hero.body,self.width);
+           if (self.hero.body[0])%self.width==0{
+            console_log!("hit left");
+                dir=0;
+            }
+            else{
+                dir=-1i32;
+             }
+          
 
         }
         else if p==68{
             self.hero.body[5]= self.hero.body[0]+self.width-1;
             self.hero.body[6]= self.hero.body[0]-self.width-1;
-            console_log!("val {:?} {}",self.hero.body,self.width);
-            dir=1i32;
+            console_log!("val r {:?} {}",self.hero.body,self.width);
+            if (self.hero.body[2]+1)%self.width==0{
+                console_log!("hit right");
+                dir=0;
+            }
+            else{
+                dir=1i32;
+             }
+           
         }
         else if p==87{
             self.hero.body[5]= self.hero.body[0]+2*self.width+2;
