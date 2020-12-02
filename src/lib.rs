@@ -97,13 +97,14 @@ pub fn main() -> Result<(), JsValue> {
 pub fn greet() {
     alert("Hello, brick-tankgame!");
 }
-#[derive(Clone)]
+#[derive(Clone,PartialEq)]
 enum Cell{
     Alive,
-    Dead
+    Dead,
+    Stone
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone,PartialEq)]
 enum Direction{
     UP,
     DOWN,
@@ -128,7 +129,7 @@ impl Bullet{
     }
 
     pub fn move_on(&mut self,width:u32,height:u32){
-        match self.direction{
+        match &self.direction{
             UP =>{
                  self.colum-=width; 
             },
@@ -158,6 +159,7 @@ struct Tanker{
     bullet:Vec<Bullet>,
     width:u32,
     height:u32,
+    direction:Direction,
 }
 #[wasm_bindgen]
 impl Tanker{
@@ -168,13 +170,26 @@ impl Tanker{
             bullet:vec![],
             width:width,
             height:height,
+            direction:Direction::DOWN
         }
     }
 
     pub fn tank_move(&mut self){
         for blk in self.body.iter_mut(){
          
-            *blk+=1; 
+            if Direction::RIGHT==self.direction{
+                *blk+=1; 
+            }
+            else if Direction::LEFT==self.direction{
+                *blk-=1;
+            }
+            else if Direction::UP==self.direction{
+                *blk-=self.width;
+            }
+            else if Direction::DOWN==self.direction{
+                *blk+=self.width;
+            }
+           
         }
     }
 
@@ -214,7 +229,7 @@ impl block{
         let uheight:u32=(uheight as u32)/10u32;
         let mut ar:Vec<Cell>=Vec::new();
 
- 
+        
 
 
         for y in 0..uheight*uwidth{
