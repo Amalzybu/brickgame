@@ -170,7 +170,7 @@ impl Tanker{
             bullet:vec![],
             width:width,
             height:height,
-            direction:Direction::DOWN
+            direction:Direction::LEFT
         }
     }
 
@@ -179,6 +179,7 @@ impl Tanker{
          
             if Direction::RIGHT==self.direction{
                 *blk+=1; 
+               
             }
             else if Direction::LEFT==self.direction{
                 *blk-=1;
@@ -191,7 +192,53 @@ impl Tanker{
             }
            
         }
+        
+        if self.body[0]%16u32==0{
+            self.direction=Direction::UP;
+        }
+        else if self.body[0]%9u32==0{
+            self.direction=Direction::DOWN;
+        }
+        else  if self.body[0]%25u32==0{
+            self.direction=Direction::LEFT;
+        }
+        else  if self.body[0]%49u32==0{
+            self.direction=Direction::RIGHT;
+        }
     }
+
+    pub fn change_direction(&mut self,dir:i8){
+        if dir==1{
+            self.body[5]= self.body[0]+self.width+3;
+            self.body[6]= self.body[0]-self.width+3;
+            self.direction=Direction::LEFT;
+        }
+        else if dir==2{
+            self.body[5]= self.body[0]+self.width-1;
+            self.body[6]= self.body[0]-self.width-1;
+            self.direction=Direction::RIGHT;
+
+        }
+        else if dir==3{
+           
+            self.direction=Direction::UP;
+            self.body[5]= self.body[0]-2*self.width+2;
+            self.body[6]= self.body[0]-2*self.width;
+        }
+        else if dir==4{
+          
+            self.direction=Direction::DOWN;
+            self.body[5]= self.body[0]+2*self.width+2;
+            self.body[6]= self.body[0]+2*self.width;
+        }
+
+
+    }
+
+    pub fn get_cell(&self)->u32{
+        self.body[0]
+    }
+
 
    
 
@@ -206,10 +253,7 @@ impl block{
         let document = window.document().expect("should have a document on window");
         let canvas = document.get_element_by_id("canvas").unwrap();
 
-        let closure = Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
-           console_log!("hello world");
-           
-        }) as Box<dyn FnMut(_)>);
+      
 
 
        
@@ -219,8 +263,6 @@ impl block{
         .map_err(|_| ())
         .unwrap();
 
-        canvass.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
-        closure.forget(); 
         let width=window.inner_width().unwrap();
         let height=window.inner_height().unwrap();
         let uwidth=width.as_f64().unwrap();
@@ -342,6 +384,7 @@ impl block{
         // context.fill_rect(20.0, 20.0, 10f64, 10f64);
         // context.fill_rect(20.0, 31.0, 10f64, 10f64);
     }
+
     pub fn mov_dir(&mut self,p:u32){
         console_log!("direction {}",self.hero.body[1]);
         // let pos:&u32= self.body.first().unwrap();
