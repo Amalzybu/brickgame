@@ -192,18 +192,18 @@ impl Tanker{
             }
            
         }
-        
-        if self.body[0]%16u32==0{
-            self.direction=Direction::UP;
+        if (self.body[0])%self.width==0{
+            self.change_direction(3);
+           
         }
-        else if self.body[0]%9u32==0{
-            self.direction=Direction::DOWN;
+        else if (self.body[2]+1)%self.width==0{
+            self.change_direction(4);
         }
-        else  if self.body[0]%25u32==0{
-            self.direction=Direction::LEFT;
+        else  if self.body[4]/self.width==0{
+            self.change_direction(1);
         }
-        else  if self.body[0]%49u32==0{
-            self.direction=Direction::RIGHT;
+        else  if  (self.body[3]/self.width)==self.height-1{
+            self.change_direction(2);
         }
     }
 
@@ -221,15 +221,17 @@ impl Tanker{
         }
         else if dir==3{
            
-            self.direction=Direction::UP;
+           
             self.body[5]= self.body[0]-2*self.width+2;
             self.body[6]= self.body[0]-2*self.width;
+            self.direction=Direction::UP;
         }
         else if dir==4{
           
-            self.direction=Direction::DOWN;
+          
             self.body[5]= self.body[0]+2*self.width+2;
             self.body[6]= self.body[0]+2*self.width;
+            self.direction=Direction::DOWN;
         }
 
 
