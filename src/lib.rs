@@ -170,7 +170,7 @@ impl Tanker{
             bullet:vec![],
             width:width,
             height:height,
-            direction:Direction::LEFT
+            direction:Direction::RIGHT
         }
     }
 
@@ -193,16 +193,20 @@ impl Tanker{
            
         }
         if (self.body[0])%self.width==0{
+              //move 
             self.change_direction(3);
            
         }
         else if (self.body[2]+1)%self.width==0{
+            //move down
             self.change_direction(4);
         }
         else  if self.body[4]/self.width==0{
+              //move left
             self.change_direction(1);
         }
         else  if  (self.body[3]/self.width)==self.height-1{
+            //move up
             self.change_direction(2);
         }
     }
@@ -221,16 +225,16 @@ impl Tanker{
         }
         else if dir==3{
            
-           
-            self.body[5]= self.body[0]-2*self.width+2;
-            self.body[6]= self.body[0]-2*self.width;
+            self.body[5]= self.body[0]+2*self.width+2;
+            self.body[6]= self.body[0]+2*self.width;
+            
             self.direction=Direction::UP;
         }
         else if dir==4{
           
+            self.body[5]= self.body[0]-2*self.width+2;
+            self.body[6]= self.body[0]-2*self.width;
           
-            self.body[5]= self.body[0]+2*self.width+2;
-            self.body[6]= self.body[0]+2*self.width;
             self.direction=Direction::DOWN;
         }
 
@@ -278,7 +282,13 @@ impl block{
 
         for y in 0..uheight*uwidth{
         //    if(y%2==0){
-            ar.push(Cell::Dead);
+           
+            if y/uwidth==0|| y%uwidth==0 ||y/uwidth==uheight-1||(y+1)%uwidth==0{
+                ar.push(Cell::Alive);
+            }
+            else{
+                ar.push(Cell::Dead);
+            }
         //    }
         //    else{
         //        ar.push(Cell::Alive);
@@ -291,7 +301,7 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(200,uwidth as u32,uheight as u32)],
+            tanks:vec![Tanker::new(500,uwidth as u32,uheight as u32),Tanker::new(700,uwidth as u32,uheight as u32)],
             hero:Tanker::new(600,uwidth as u32,uheight as u32),
             old_hero:Tanker::new(600,uwidth as u32,uheight as u32)
 
