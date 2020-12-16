@@ -3,6 +3,7 @@ mod utils;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use gloo::{events::EventListener};
+use std::fmt;
 
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -104,6 +105,16 @@ enum Cell{
     Stone
 }
 
+impl fmt::Display for Cell {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let printable = match *self {
+            Cell::Alive => "Alive",
+            Cell::Dead => "Dead",
+            Cell::Stone => "Stone"
+        };
+        write!(f, "{}", printable)
+    }
+}
 #[derive(Clone,PartialEq)]
 enum Direction{
     UP,
@@ -161,7 +172,7 @@ struct Tanker{
     height:u32,
     direction:Direction,
 }
-#[wasm_bindgen]
+
 impl Tanker{
     pub fn new(pos:u32,width:u32,height:u32)->Self{
         Self{
@@ -174,12 +185,13 @@ impl Tanker{
         }
     }
 
-    pub fn tank_move(&mut self){
+    pub fn tank_move(&mut self,array: & Vec<Cell>){
+        
         for blk in self.body.iter_mut(){
          
             if Direction::RIGHT==self.direction{
+                    // 
                 *blk+=1; 
-               
             }
             else if Direction::LEFT==self.direction{
                 *blk-=1;
@@ -192,21 +204,27 @@ impl Tanker{
             }
            
         }
-        if (self.body[0])%self.width==0{
-              //move 
+      
+       
+        if  Cell::Stone==*array.get(self.body[0] as usize).unwrap(){
+              //move right
+              console_log!("h1");
             self.change_direction(3);
            
         }
-        else if (self.body[2]+1)%self.width==0{
+        else if Cell::Stone==*array.get((self.body[2]+1) as usize).unwrap(){
             //move down
+            console_log!("hdown");
             self.change_direction(4);
         }
-        else  if self.body[4]/self.width==0{
+        else  if  Cell::Stone==*array.get(self.body[4] as usize).unwrap(){
               //move left
+            console_log!("hleft");
             self.change_direction(1);
         }
-        else  if  (self.body[3]/self.width)==self.height-1{
+        else  if Cell::Stone==*array.get(self.body[3] as usize).unwrap(){
             //move up
+            console_log!("hup");
             self.change_direction(2);
         }
     }
@@ -284,7 +302,7 @@ impl block{
         //    if(y%2==0){
            
             if y/uwidth==0|| y%uwidth==0 ||y/uwidth==uheight-1||(y+1)%uwidth==0{
-                ar.push(Cell::Alive);
+                ar.push(Cell::Stone);
             }
             else{
                 ar.push(Cell::Dead);
@@ -328,7 +346,7 @@ impl block{
     
 
     for ik in self.tanks.iter_mut(){
-        ik.tank_move();
+        ik.tank_move(&self.array);
     }
 
    for k in self.tanks.iter(){
@@ -382,7 +400,7 @@ impl block{
         
 
         for ii in 0..self.array.len(){
-            if let Cell::Alive=self.array[ii]{
+            if Cell::Alive==self.array[ii]||Cell::Stone==self.array[ii]{
                 // console_log!("values tanks {} {} {}",ii,(ii%self.width  as usize),(ii%self.height as usize));
                 context.set_fill_style(&"#000000".into());        
                 context.fill_rect((10.0*(ii%self.width  as usize) as f64)+1f64, (10.0 *(ii/self.width as usize) as f64)+1f64, 9f64, 9f64);
