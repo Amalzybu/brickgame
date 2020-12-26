@@ -209,28 +209,32 @@ impl Tanker{
         if  Cell::Stone==*array.get((self.body[2]+1) as usize).unwrap(){
               //move right
             //   console_log!("h1");
-            self.change_direction(3);
+            self.change_direction(3,array);
            
         }
         else if Cell::Stone==*array.get((self.body[2]+self.width) as usize).unwrap(){
             //move down
             // console_log!("hdown");
-            self.change_direction(4);
+            self.change_direction(4,array);
         }
         else  if  Cell::Stone==*array.get((self.body[2]-1) as usize).unwrap(){
               //move left
             // console_log!("hleft");
-            self.change_direction(1);
+            self.change_direction(1,array);
         }
         else  if Cell::Stone==*array.get((self.body[2]-self.width) as usize).unwrap(){
             //move up
             // console_log!("hup");
-            self.change_direction(2);
+            self.change_direction(2,array);
         }
     }
 
-    pub fn change_direction(&mut self,dir:i8){
+    pub fn change_direction(&mut self,mut dir:i8,array: & Vec<Cell>){
+        
         if dir==1{
+            if Cell::Stone==*array.get((self.body[0]-3) as usize).unwrap(){
+                dir=2;
+            }
             self.body[1]= self.body[0]-1;
             self.body[2]= self.body[0]-2;
             self.body[3]= self.body[0]+self.width-1;
@@ -239,7 +243,10 @@ impl Tanker{
             self.body[6]= self.body[0]-self.width+1;
             self.direction=Direction::LEFT;
         }
-        else if dir==2{
+        if dir==2{
+            if Cell::Stone==*array.get((self.body[0]+3) as usize).unwrap(){
+                dir=3;
+            }
             self.body[1]= self.body[0]+1;
             self.body[2]= self.body[0]+2;
             self.body[3]= self.body[0]+self.width+1;
@@ -249,8 +256,10 @@ impl Tanker{
             self.direction=Direction::RIGHT;
 
         }
-        else if dir==3{
-           
+        if dir==3{
+            if Cell::Stone==*array.get((self.body[0]-self.width*2) as usize).unwrap(){
+                dir=4;
+            }
             self.body[1]= self.body[0]-(self.width);
             self.body[2]= self.body[0]-(self.width*2);
             self.body[3]= self.body[0]-(self.width)+1;
@@ -260,8 +269,10 @@ impl Tanker{
             
             self.direction=Direction::UP;
         }
-        else if dir==4{
-          
+        if dir==4{
+            if Cell::Stone==*array.get((self.body[0]+self.width*2) as usize).unwrap(){
+                dir=1;
+            }
             self.body[1]= self.body[0]+(self.width);
             self.body[2]= self.body[0]+(self.width*2);
             self.body[3]= self.body[0]+(self.width)+1;
