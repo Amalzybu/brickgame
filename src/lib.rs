@@ -174,14 +174,28 @@ struct Tanker{
 }
 
 impl Tanker{
-    pub fn new(pos:u32,width:u32,height:u32)->Self{
+    pub fn new(pos:u32,width:u32,height:u32,dir:Direction)->Self{
         Self{
             x:pos as usize,
-            body:vec![pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1],
+            body:
+            {   
+                if Direction::LEFT==dir{
+                    vec![pos,pos-1,pos-2,pos+width-1,pos-width-1,pos+width+1,pos-width+1]
+                }
+                else if Direction::RIGHT==dir{
+                    vec![pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1]
+                }
+                else if Direction::UP==dir{
+                    vec![pos,pos-width,pos-(width*2),pos-width+1,pos-width-1,pos+width-1,pos+width+1]
+                }
+                else{
+                    vec![pos,pos+width,pos+(width*2),pos+width+1,pos+width-1,pos-width-1,pos-width+1]
+                }
+            },
             bullet:vec![],
             width:width,
             height:height,
-            direction:Direction::RIGHT
+            direction:dir
         }
     }
 
@@ -346,10 +360,10 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32)],
+            tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32,Direction::LEFT),Tanker::new(2050,uwidth as u32,uheight as u32,Direction::RIGHT),Tanker::new(3050,uwidth as u32,uheight as u32,Direction::UP)],
             // tanks:vec![],
-            hero:Tanker::new(600,uwidth as u32,uheight as u32),
-            old_hero:Tanker::new(600,uwidth as u32,uheight as u32)
+            hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
+            old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT)
 
         }
     }
