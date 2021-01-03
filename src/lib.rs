@@ -115,7 +115,7 @@ impl fmt::Display for Cell {
         write!(f, "{}", printable)
     }
 }
-#[derive(Clone,PartialEq)]
+#[derive(Clone,PartialEq,Copy)]
 enum Direction{
     UP,
     DOWN,
@@ -123,7 +123,7 @@ enum Direction{
     RIGHT
 }
 
-
+#[derive(Copy,Clone)]
 struct Bullet{
     direction:Direction,
     colum:u32,
@@ -141,12 +141,10 @@ impl Bullet{
 
     pub fn move_on(&mut self,width:u32,height:u32){
         match &self.direction{
-            UP =>{
-                 self.colum-=width; 
-            },
-            DOWN=>{},
-            LEFT=>{},
-            RIGHT=>{}
+            UP =>{self.colum-=width;},
+            DOWN=>{ self.colum+=width; },
+            LEFT=>{ self.colum-=1; },
+            RIGHT=>{ self.colum+=1; }
 
         }
     }
@@ -162,6 +160,7 @@ struct block{
     tanks:Vec<Tanker>,
     hero:Tanker,
     old_hero:Tanker,
+    bullets:Vec<Bullet>
 }
 #[wasm_bindgen]
 struct Tanker{
@@ -229,12 +228,12 @@ impl Tanker{
         else if Cell::Stone==*array.get((self.body[2]+self.width) as usize).unwrap(){
             //move down
             // console_log!("hdown");
-            self.change_direction(4,array);
+            self.change_direction(1,array);
         }
         else  if  Cell::Stone==*array.get((self.body[2]-1) as usize).unwrap(){
               //move left
             // console_log!("hleft");
-            self.change_direction(1,array);
+            self.change_direction(4,array);
         }
         else  if Cell::Stone==*array.get((self.body[2]-self.width) as usize).unwrap(){
             //move up
@@ -363,7 +362,8 @@ impl block{
             tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32,Direction::LEFT),Tanker::new(2050,uwidth as u32,uheight as u32,Direction::RIGHT),Tanker::new(3050,uwidth as u32,uheight as u32,Direction::UP)],
             // tanks:vec![],
             hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
-            old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT)
+            old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
+            bullets:Vec::<Bullet>::new(),
 
         }
     }
@@ -411,6 +411,11 @@ impl block{
     //         self.array.push(Cell::Alive);
     //        }
     //     }
+    self.bullets=self.bullets.iter_mut().filter(|v|{ 
+        v.is_alive
+    }).map(|v|{*v}).collect::<Vec<_>>();
+
+    
     
     }
 
