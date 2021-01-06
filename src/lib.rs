@@ -139,12 +139,49 @@ impl Bullet{
         }
     }
 
-    pub fn move_on(&mut self,width:u32,height:u32){
+    pub fn move_on(&mut self,width:u32,height:u32,array: & Vec<Cell>){
         match &self.direction{
-            UP =>{self.colum-=width;},
-            DOWN=>{ self.colum+=width; },
-            LEFT=>{ self.colum-=1; },
-            RIGHT=>{ self.colum+=1; }
+            UP =>{
+                    self.colum-=width*2;
+                    if self.colum<0{
+                        self.is_alive=false;
+                    }
+                    else{
+                         if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum-width) as usize]{
+                             self.is_alive=false;
+                        }
+                    }
+            },
+            DOWN=>{ self.colum+=width*2;
+                if self.colum<0{
+                    self.is_alive=false;
+                }
+                else{
+                if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum+width) as usize]{
+                    self.is_alive=false;
+                }
+            }
+            },
+            LEFT=>{ self.colum-=2;
+                if self.colum<0{
+                    self.is_alive=false;
+                }
+                else{
+                if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum-1) as usize]{
+                    self.is_alive=false;
+                }
+            }
+            },
+            RIGHT=>{ self.colum+=2; 
+                if self.colum<0{
+                    self.is_alive=false;
+                }
+                else{
+                if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum+1) as usize]{
+                    self.is_alive=false;
+                }
+            }
+            }
 
         }
     }
@@ -160,7 +197,6 @@ struct block{
     tanks:Vec<Tanker>,
     hero:Tanker,
     old_hero:Tanker,
-    bullets:Vec<Bullet>
 }
 #[wasm_bindgen]
 struct Tanker{
@@ -169,6 +205,7 @@ struct Tanker{
     bullet:Vec<Bullet>,
     width:u32,
     height:u32,
+    trigger:u32,
     direction:Direction,
 }
 
@@ -194,12 +231,21 @@ impl Tanker{
             bullet:vec![],
             width:width,
             height:height,
+            trigger:0,
             direction:dir
         }
     }
 
     pub fn tank_move(&mut self,array: & Vec<Cell>){
-        
+       
+
+        self.trigger+=1;
+        if self.trigger==100{
+            self.bullet.push(Bullet::new(self.body[0],self.direction));
+            self.trigger=0;
+        }
+
+
         for blk in self.body.iter_mut(){
          
             if Direction::RIGHT==self.direction{
@@ -240,6 +286,10 @@ impl Tanker{
             // console_log!("hup");
             self.change_direction(2,array);
         }
+
+       for k in self.bullet.iter_mut(){
+           k.move_on(self.width,self.height,array);
+       }
     }
 
     pub fn change_direction(&mut self,mut dir:i8,array: & Vec<Cell>){
@@ -363,7 +413,6 @@ impl block{
             // tanks:vec![],
             hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
             old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
-            bullets:Vec::<Bullet>::new(),
 
         }
     }
@@ -379,13 +428,19 @@ impl block{
         }
      // self.array[self.tanks[k].x]=Cell::Alive;
      }
-
+     for k in self.tanks.iter(){
+        for j in k.bullet.iter(){
+         //    console_log!("values tanks {}",*j);
+          self.array[j.colum as usize]=Cell::Dead;
+        }
+     // self.array[self.tanks[k].x]=Cell::Alive;
+     }
      for j in self.hero.body.iter(){
         //    console_log!("values tanks {}",*j);
          self.array[*j as usize]=Cell::Dead;
        }
 
-    
+   
 
     for ik in self.tanks.iter_mut(){
         ik.tank_move(&self.array);
@@ -399,6 +454,14 @@ impl block{
     // self.array[self.tanks[k].x]=Cell::Alive;
     }
 
+    for k in self.tanks.iter(){
+        for j in k.bullet.iter(){
+         //    console_log!("values tanks {}",*j);
+          self.array[j.colum as usize]=Cell::Alive;
+        }
+     // self.array[self.tanks[k].x]=Cell::Alive;
+     }
+
     for j in self.hero.body.iter(){
         //    console_log!("values tanks {}",*j);
          self.array[*j as usize]=Cell::Alive;
@@ -411,9 +474,9 @@ impl block{
     //         self.array.push(Cell::Alive);
     //        }
     //     }
-    self.bullets=self.bullets.iter_mut().filter(|v|{ 
-        v.is_alive
-    }).map(|v|{*v}).collect::<Vec<_>>();
+    // self.bullets=self.bullets.iter_mut().filter(|v|{ 
+    //     v.is_alive
+    // }).map(|v|{*v}).collect::<Vec<_>>();
 
     
     
