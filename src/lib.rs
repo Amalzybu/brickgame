@@ -140,21 +140,13 @@ impl Bullet{
     }
 
     pub fn move_on(&mut self,width:u32,height:u32,array: & Vec<Cell>){
-        match &self.direction{
-            UP =>{
-                    self.colum-=width*2;
-                    if self.colum<0{
-                        self.is_alive=false;
-                    }
-                    else{
-                         if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum-width) as usize]{
-                             self.is_alive=false;
-                        }
-                    }
-            },
-            DOWN=>{ self.colum+=width*2;
+       
+        match self.direction{
+            Direction::DOWN=>{ self.colum+=width*2;
                 if self.colum<0{
+                    console_log!("index become zero");
                     self.is_alive=false;
+                    self.colum=0;
                 }
                 else{
                 if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum+width) as usize]{
@@ -162,9 +154,25 @@ impl Bullet{
                 }
             }
             },
-            LEFT=>{ self.colum-=2;
+            Direction::UP =>{
+                    self.colum-=width*2;
+                    if self.colum<0{
+                        console_log!("index become zero");
+                        self.is_alive=false;
+                        self.colum=0;
+                    }
+                    else{
+                         if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum-width) as usize]{
+                             self.is_alive=false;
+                        }
+                    }
+            },
+           
+             Direction::LEFT=>{ self.colum-=2;
                 if self.colum<0{
+                    console_log!("index become zero");
                     self.is_alive=false;
+                    self.colum=0;
                 }
                 else{
                 if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum-1) as usize]{
@@ -172,9 +180,11 @@ impl Bullet{
                 }
             }
             },
-            RIGHT=>{ self.colum+=2; 
+            Direction::RIGHT=>{ self.colum+=2; 
                 if self.colum<0{
+                    console_log!("index become zero");
                     self.is_alive=false;
+                    self.colum=0;
                 }
                 else{
                 if Cell::Stone==array[self.colum as usize]|| Cell::Stone==array[(self.colum+1) as usize]{
@@ -182,7 +192,7 @@ impl Bullet{
                 }
             }
             }
-
+        
         }
     }
 }
@@ -290,7 +300,10 @@ impl Tanker{
        for k in self.bullet.iter_mut(){
            k.move_on(self.width,self.height,array);
        }
-    }
+       self.bullet=self.bullet.iter_mut().filter(|v|{ 
+            v.is_alive
+        }).map(|v|{*v}).collect::<Vec<_>>();
+        }
 
     pub fn change_direction(&mut self,mut dir:i8,array: & Vec<Cell>){
         
