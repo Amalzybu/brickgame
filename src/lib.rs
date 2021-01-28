@@ -4,6 +4,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use gloo::{events::EventListener};
 use std::fmt;
+use rand::Rng;
+use rand::distributions::{Distribution, Uniform};
 
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -30,7 +32,7 @@ macro_rules! console_log {
 
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
-    
+   
     // Use `web_sys`'s global `window` function to get a handle on the global
     // window object.
     let window = web_sys::window().expect("no global `window` exists");
@@ -250,10 +252,23 @@ impl Tanker{
        
 
         self.trigger+=1;
-        if self.trigger==100{
+        let mut rng = rand::thread_rng();
+
+        let n1: u8 = rng.gen();
+        let n1=if(n1 as u32==0){1u32}else{n1 as u32};
+       
+        if self.trigger%n1==0{
             self.bullet.push(Bullet::new(self.body[0],self.direction));
-            self.trigger=0;
+            // self.trigger=0;
         }
+        if self.trigger%50==0{
+            let die = Uniform::from(1..4);
+            let throw:i8 = die.sample(&mut rng);
+            // console_log!("direction sssss {}",throw);
+                self.change_direction(throw,array);
+                self.trigger=0;
+        }
+      
 
 
         for blk in self.body.iter_mut(){
