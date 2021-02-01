@@ -562,8 +562,10 @@ impl block{
         self.old_hero.body[i]=self.hero.body[i];
       }
         if p==65{
+            // self.array
         // //    pos,pos+1,pos+2,pos+width+1,pos-width+1,pos+width-1,pos-width-1
-           
+        if Cell::Stone!=*self.array.get((self.hero.body[0]-3) as usize).unwrap(){
+        
            
         //    console_log!("val l {:?} {}",self.hero.body,self.width);
         self.hero.body[1]= self.hero.body[0]-1;
@@ -579,10 +581,15 @@ impl block{
             else{
                 dir=-1i32;
              }
-             self.hero.direction=Direction::LEFT;
+           
+                 
+        }
+        self.hero.direction=Direction::LEFT;
 
         }
         else if p==68{
+            if Cell::Stone!=*self.array.get((self.hero.body[0]+3) as usize).unwrap(){
+            
             self.hero.body[1]= self.hero.body[0]+1;
             self.hero.body[2]= self.hero.body[0]+2;
             self.hero.body[3]= self.hero.body[0]+self.width+1;
@@ -599,44 +606,55 @@ impl block{
             else{
                 dir=1i32;
              }
-             self.hero.direction=Direction::RIGHT;
+            
+            }
+            self.hero.direction=Direction::RIGHT;
 
            
         }
         else if p==87{
-            self.hero.body[1]= self.hero.body[0]-(self.width);
-            self.hero.body[2]= self.hero.body[0]-(self.width*2);
-            self.hero.body[3]= self.hero.body[0]-(self.width)+1;
-            self.hero.body[4]= self.hero.body[0]-(self.width)-1;
-            self.hero.body[5]= self.hero.body[0]+(self.width)-1;
-            self.hero.body[6]= self.hero.body[0]+(self.width)+1;
-            // console_log!("val {:?} {}",self.hero.body,self.width);
-        
-            if (self.hero.body[4]/self.width)==0||Direction::UP!=self.hero.direction{
-                dir=0;
+            if Cell::Stone!=*self.array.get((self.hero.body[0]-self.width*2) as usize).unwrap(){
+             
+                    self.hero.body[1]= self.hero.body[0]-(self.width);
+                    self.hero.body[2]= self.hero.body[0]-(self.width*2);
+                    self.hero.body[3]= self.hero.body[0]-(self.width)+1;
+                    self.hero.body[4]= self.hero.body[0]-(self.width)-1;
+                    self.hero.body[5]= self.hero.body[0]+(self.width)-1;
+                    self.hero.body[6]= self.hero.body[0]+(self.width)+1;
+                    // console_log!("val {:?} {}",self.hero.body,self.width);
+                
+                    if (self.hero.body[4]/self.width)==0||Direction::UP!=self.hero.direction{
+                        dir=0;
+                    }
+                    else{
+                        dir=-1i32*(self.width as i32);
+                    }
+                    self.hero.direction=Direction::UP;
             }
-            else{
-                dir=-1i32*(self.width as i32);
-            }
-            self.hero.direction=Direction::UP;
+          
 
         }
         else if p==83{
-            self.hero.body[1]= self.hero.body[0]+(self.width);
-            self.hero.body[2]= self.hero.body[0]+(self.width*2);
-            self.hero.body[3]= self.hero.body[0]+(self.width)+1;
-            self.hero.body[4]= self.hero.body[0]+(self.width)-1;
-            self.hero.body[5]= self.hero.body[0]-(self.width)-1;
-            self.hero.body[6]= self.hero.body[0]-(self.width)+1;
-            // console_log!("val {:?} {} {}",self.hero.body,(self.hero.body[3]/self.width),self.height-1);
-      
-            if (self.hero.body[3]/self.width)==self.height-1||Direction::DOWN!=self.hero.direction{
-                dir=0;
+
+            if Cell::Stone!=*self.array.get((self.hero.body[0]+self.width*2) as usize).unwrap(){
+                    
+                    self.hero.body[1]= self.hero.body[0]+(self.width);
+                    self.hero.body[2]= self.hero.body[0]+(self.width*2);
+                    self.hero.body[3]= self.hero.body[0]+(self.width)+1;
+                    self.hero.body[4]= self.hero.body[0]+(self.width)-1;
+                    self.hero.body[5]= self.hero.body[0]-(self.width)-1;
+                    self.hero.body[6]= self.hero.body[0]-(self.width)+1;
+                    // console_log!("val {:?} {} {}",self.hero.body,(self.hero.body[3]/self.width),self.height-1);
+            
+                    if (self.hero.body[3]/self.width)==self.height-1||Direction::DOWN!=self.hero.direction{
+                        dir=0;
+                    }
+                    else{
+                        dir=self.width as i32;
+                    }
+                    self.hero.direction=Direction::DOWN;
             }
-            else{
-                dir=self.width as i32;
-            }
-            self.hero.direction=Direction::DOWN;
+          
            
         }
       
