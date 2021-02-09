@@ -98,7 +98,7 @@ pub fn main() -> Result<(), JsValue> {
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello, brick-tankgame!");
+    // alert("Hello, brick-tankgame!");
 }
 #[derive(Clone,PartialEq)]
 enum Cell{
@@ -146,7 +146,7 @@ impl Bullet{
         match self.direction{
             Direction::DOWN=>{ self.colum+=width*2;
                 if self.colum<0{
-                    console_log!("index become zero");
+                    // console_log!("index become zero");
                     self.is_alive=false;
                     self.colum=0;
                 }
@@ -159,7 +159,7 @@ impl Bullet{
             Direction::UP =>{
                     self.colum-=width*2;
                     if self.colum<0{
-                        console_log!("index become zero");
+                        // console_log!("index become zero");
                         self.is_alive=false;
                         self.colum=0;
                     }
@@ -172,7 +172,7 @@ impl Bullet{
            
              Direction::LEFT=>{ self.colum-=2;
                 if self.colum<0{
-                    console_log!("index become zero");
+                    // console_log!("index become zero");
                     self.is_alive=false;
                     self.colum=0;
                 }
@@ -184,7 +184,7 @@ impl Bullet{
             },
             Direction::RIGHT=>{ self.colum+=2; 
                 if self.colum<0{
-                    console_log!("index become zero");
+                    // console_log!("index become zero");
                     self.is_alive=false;
                     self.colum=0;
                 }
@@ -613,7 +613,7 @@ impl block{
            
         }
         else if p==87{
-            if Cell::Stone!=*self.array.get((self.hero.body[0]-self.width*2) as usize).unwrap(){
+            if Cell::Stone!=*self.array.get((self.hero.body[0]-self.width*3) as usize).unwrap(){
              
                     self.hero.body[1]= self.hero.body[0]-(self.width);
                     self.hero.body[2]= self.hero.body[0]-(self.width*2);
@@ -636,7 +636,7 @@ impl block{
         }
         else if p==83{
 
-            if Cell::Stone!=*self.array.get((self.hero.body[0]+self.width*2) as usize).unwrap(){
+            if Cell::Stone!=*self.array.get((self.hero.body[0]+self.width*3) as usize).unwrap(){
                     
                     self.hero.body[1]= self.hero.body[0]+(self.width);
                     self.hero.body[2]= self.hero.body[0]+(self.width*2);
