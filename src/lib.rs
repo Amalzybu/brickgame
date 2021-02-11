@@ -218,6 +218,7 @@ struct Tanker{
     width:u32,
     height:u32,
     trigger:u32,
+    dead:bool,
     direction:Direction,
 }
 
@@ -244,6 +245,7 @@ impl Tanker{
             width:width,
             height:height,
             trigger:0,
+            dead:false,
             direction:dir
         }
     }
@@ -318,7 +320,14 @@ impl Tanker{
        self.bullet=self.bullet.iter_mut().filter(|v|{ 
             v.is_alive
         }).map(|v|{*v}).collect::<Vec<_>>();
+
+           
         }
+
+
+     
+
+
 
     pub fn change_direction(&mut self,mut dir:i8,array: & Vec<Cell>){
         
@@ -437,7 +446,8 @@ impl block{
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32,Direction::LEFT),Tanker::new(2050,uwidth as u32,uheight as u32,Direction::RIGHT),Tanker::new(3050,uwidth as u32,uheight as u32,Direction::UP)],
+            tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32,Direction::LEFT),Tanker::new(2050,uwidth as u32,uheight as u32,Direction::RIGHT),Tanker::new(3050,uwidth as u32,uheight as u32,Direction::UP)
+                        ,Tanker::new(5000,uwidth as u32,uheight as u32,Direction::LEFT)],
             // tanks:vec![],
             hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
             old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
@@ -445,6 +455,7 @@ impl block{
         }
     }
 
+    
 
     pub fn draw(&mut self){
     
@@ -506,7 +517,16 @@ impl block{
     //     v.is_alive
     // }).map(|v|{*v}).collect::<Vec<_>>();
 
-    
+    //**************remove collided tanker from array*********************//
+        fn collides_and_remove_tank(array:&mut Vec<Tanker>){
+            let mut temp=Vec::<u32>::new();
+            array.iter().map(move|v|{
+                let mut newvec=v.body.to_vec();
+                temp.append(&mut newvec);
+                v
+            });
+            
+        }
     
     }
 
@@ -637,7 +657,7 @@ impl block{
         else if p==83{
 
             if Cell::Stone!=*self.array.get((self.hero.body[0]+self.width*3) as usize).unwrap(){
-                    
+                
                     self.hero.body[1]= self.hero.body[0]+(self.width);
                     self.hero.body[2]= self.hero.body[0]+(self.width*2);
                     self.hero.body[3]= self.hero.body[0]+(self.width)+1;
