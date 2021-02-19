@@ -460,6 +460,15 @@ impl block{
     pub fn draw(&mut self){
     
     // self.array.clear();
+    let removal =collides_and_remove_tank(&mut self.tanks);
+    // removal.iter().map(move |v|{
+    //     self.tanks.remove(*v as usize);
+    //     v
+    // });
+
+    for k in removal.iter(){
+        self.tanks.remove(*k as usize);
+    }
     for k in self.tanks.iter(){
         for j in k.body.iter(){
          //    console_log!("values tanks {}",*j);
@@ -518,13 +527,29 @@ impl block{
     // }).map(|v|{*v}).collect::<Vec<_>>();
 
     //**************remove collided tanker from array*********************//
-        fn collides_and_remove_tank(array:&mut Vec<Tanker>){
-            let mut temp=Vec::<u32>::new();
-            array.iter().map(move|v|{
-                let mut newvec=v.body.to_vec();
-                temp.append(&mut newvec);
-                v
-            });
+        fn collides_and_remove_tank(array:&mut Vec<Tanker>)->Vec<u32>{
+           let mut retr=Vec::<u32>::new();
+            for i in 0..array.len()-1{
+                for j in (i+1)..array.len()-1{
+                    // let matching = a.iter().zip(&b).filter(|&(a, b)| a == b).count();
+                    // console_log!("{:?}",&array.gest(i).body);
+                    let a=&(array.get(i)).unwrap();
+                    let b=&(array.get(j)).unwrap();
+                    console_log!("aaa {:?} {:?}",a.body,b.body);
+                    let matching = a.body.iter().zip(&b.body).filter(move |&(a, b)|
+                         a == b
+                    ).count();
+                   
+                    console_log!("sssss {}",matching);
+                  
+                    if matching>0{
+                        retr.push(i as u32);
+                        retr.push(j as u32);
+                    }
+                }
+            }
+            retr
+           
             
         }
     
