@@ -1,5 +1,6 @@
 mod utils;
 
+use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use gloo::{events::EventListener};
@@ -266,7 +267,7 @@ impl Tanker{
         if self.trigger%50==0{
             let die = Uniform::from(1..4);
             let throw:i8 = die.sample(&mut rng);
-            // console_log!("direction sssss {}",throw);
+
                 self.change_direction(throw,array);
                 self.trigger=0;
         }
@@ -460,14 +461,18 @@ impl block{
     pub fn draw(&mut self){
     
     // self.array.clear();
-    let removal =collides_and_remove_tank(&mut self.tanks);
+    let removal =collides_and_remove_tank(&mut self.tanks,&mut self.hero.body);
     // removal.iter().map(move |v|{
     //     self.tanks.remove(*v as usize);
     //     v
     // });
-
+    console_log!("removal array {:?}",removal);
     for k in removal.iter(){
+        // let mut ss=&mut self.tanks[*k as usize];
+        // ss.dead=true;
         self.tanks.remove(*k as usize);
+        // console_log!("eeee {}",ss.dead);
+        
     }
     for k in self.tanks.iter(){
         for j in k.body.iter(){
@@ -527,27 +532,47 @@ impl block{
     // }).map(|v|{*v}).collect::<Vec<_>>();
 
     //**************remove collided tanker from array*********************//
-        fn collides_and_remove_tank(array:&mut Vec<Tanker>)->Vec<u32>{
+        fn collides_and_remove_tank(array:&mut Vec<Tanker>,hero:&mut Vec<u32>)->Vec<u32>{
            let mut retr=Vec::<u32>::new();
-            for i in 0..array.len()-1{
-                for j in (i+1)..array.len()-1{
-                    // let matching = a.iter().zip(&b).filter(|&(a, b)| a == b).count();
-                    // console_log!("{:?}",&array.gest(i).body);
+         
+        //    console_log!("*************************************");
+        //    console_log!("hero {:?} ",hero);
+            for i in 0..array.len(){
+              
+                // // console_log!("others {:?} ",b.body);
+                // for j in hero.iter(){
+                //     if(b.body.contains(j)){
+                //         console_log!("collided");
+                //         retr.push(i as u32);
+                //         break;
+                //     }
+                // }
+                
+                  
+                
+                    
+                for j in 0..array.len(){
+                  
+                  
+                    if i!=j{
                     let a=&(array.get(i)).unwrap();
                     let b=&(array.get(j)).unwrap();
-                    console_log!("aaa {:?} {:?}",a.body,b.body);
-                    let matching = a.body.iter().zip(&b.body).filter(move |&(a, b)|
-                         a == b
-                    ).count();
-                   
-                    console_log!("sssss {}",matching);
-                  
-                    if matching>0{
-                        retr.push(i as u32);
-                        retr.push(j as u32);
+
+                    for pp in a.body.iter(){
+                        if(b.body.contains(pp)){
+                            console_log!("collided");
+                            retr.push(j as u32);
+                            break;
+                        }
                     }
+                  
+                  
+                }
                 }
             }
+            let set: HashSet<u32> = retr.drain(..).collect(); // dedup
+            retr.extend(set.into_iter());
+            // retr.iter().unique();
             retr
            
             
