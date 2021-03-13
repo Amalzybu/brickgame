@@ -118,7 +118,7 @@ impl fmt::Display for Cell {
         write!(f, "{}", printable)
     }
 }
-#[derive(Clone,PartialEq,Copy)]
+#[derive(Clone,PartialEq,Copy,Debug)]
 enum Direction{
     UP,
     DOWN,
@@ -126,7 +126,25 @@ enum Direction{
     RIGHT
 }
 
-#[derive(Copy,Clone)]
+struct Explosion{
+    body: Vec<u32>,
+    count:u32,
+    rmv:bool
+}
+
+impl Explosion{
+    pub fn new(pos:u32,width:u32,height:u32)->Self{
+        Self{
+            body: vec![pos,pos-2,pos+width-2,pos-width,pos+width+2,pos-width+3],
+            count:0,
+            rmv:false
+        }
+    }
+}
+
+
+
+#[derive(Copy,Clone,PartialEq,Debug)]
 struct Bullet{
     direction:Direction,
     colum:u32,
@@ -208,10 +226,11 @@ struct block{
     height:u32,
     array:Vec<Cell>,
     tanks:Vec<Tanker>,
+    explosions:Vec<Explosion>,
     hero:Tanker,
     old_hero:Tanker,
 }
-#[wasm_bindgen]
+#[derive(Clone,PartialEq,Debug)]
 struct Tanker{
     x:usize,
     body: Vec<u32>,
@@ -224,6 +243,7 @@ struct Tanker{
 }
 
 impl Tanker{
+  
     pub fn new(pos:u32,width:u32,height:u32,dir:Direction)->Self{
         Self{
             x:pos as usize,
@@ -451,6 +471,7 @@ impl block{
                         ,Tanker::new(5000,uwidth as u32,uheight as u32,Direction::LEFT)],
             // tanks:vec![],
             hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
+            explosions:Vec::<Explosion>::new(),
             old_hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
 
         }
@@ -461,19 +482,49 @@ impl block{
     pub fn draw(&mut self){
     
     // self.array.clear();
-    let removal =collides_and_remove_tank(&mut self.tanks,&mut self.hero.body);
-    // removal.iter().map(move |v|{
-    //     self.tanks.remove(*v as usize);
-    //     v
-    // });
-    console_log!("removal array {:?}",removal);
-    for k in removal.iter(){
-        // let mut ss=&mut self.tanks[*k as usize];
-        // ss.dead=true;
-        self.tanks.remove(*k as usize);
-        // console_log!("eeee {}",ss.dead);
-        
+    collides_and_remove_tank(&mut self.tanks);
+    
+   let mut removal=Vec::<u32>::new();
+    // self.tanks.iter_mut().filter(|v|{ 
+    //     v.dead
+    // }).map(|mut v|{v}).collect::<Vec<_>>();
+
+   for (i,item) in self.tanks.iter().enumerate(){
+
+        if item.dead{
+            for j in item.body.iter(){
+                   console_log!("values tanks {}",item.body[0]);
+                 self.array[*j as usize]=Cell::Dead;
+               }
+               self.explosions.push(Explosion::new(item.body[0],self.width,self.height));
+            removal.push(i as u32);
+        }
+
+   }
+
+   removal.sort();
+
+   for (j,val) in removal.iter().enumerate(){
+       let ewww=val-j as u32;
+    // console_log!("pppp j{} val{}",j,val);
+    self.tanks.remove(ewww as usize);
+
     }
+ 
+
+    
+    // removal.iter().map(move |v|{
+        // &self.tanks.remove(*v as usize);
+   //     v
+    //});
+    // console_log!("removal array {:?}",removal);
+    // for k in removal.iter(){
+    //     // let mut ss=&mut self.tanks[*k as usize];
+    //     // ss.dead=true;
+    //     self.tanks.remove(*k as usize);
+    //     // console_log!("eeee {}",ss.dead);
+        
+    // }
     for k in self.tanks.iter(){
         for j in k.body.iter(){
          //    console_log!("values tanks {}",*j);
@@ -498,6 +549,16 @@ impl block{
     for ik in self.tanks.iter_mut(){
         ik.tank_move(&self.array);
     }
+
+    for k in self.explosions.iter(){
+        for j in k.body.iter(){
+         //    console_log!("values tanks {}",*j);
+          self.array[*j as usize]=Cell::Alive;
+        }
+     // self.array[self.tanks[k].x]=Cell::Alive;
+     }
+
+
 
    for k in self.tanks.iter(){
        for j in k.body.iter(){
@@ -532,36 +593,24 @@ impl block{
     // }).map(|v|{*v}).collect::<Vec<_>>();
 
     //**************remove collided tanker from array*********************//
-        fn collides_and_remove_tank(array:&mut Vec<Tanker>,hero:&mut Vec<u32>)->Vec<u32>{
-           let mut retr=Vec::<u32>::new();
+        fn collides_and_remove_tank(array:&mut Vec<Tanker>){
          
-        //    console_log!("*************************************");
-        //    console_log!("hero {:?} ",hero);
+        let mut ret=Vec::<u32>::new();
             for i in 0..array.len(){
               
-                // // console_log!("others {:?} ",b.body);
-                // for j in hero.iter(){
-                //     if(b.body.contains(j)){
-                //         console_log!("collided");
-                //         retr.push(i as u32);
-                //         break;
-                //     }
-                // }
-                
-                  
-                
+             
                     
                 for j in 0..array.len(){
                   
                   
                     if i!=j{
-                    let a=&(array.get(i)).unwrap();
-                    let b=&(array.get(j)).unwrap();
-
+                    let mut a=(array.get(i)).unwrap();
+                    let mut b=(array.get(j)).unwrap();
+                    // *b.dead=true;
                     for pp in a.body.iter(){
                         if(b.body.contains(pp)){
                             console_log!("collided");
-                            retr.push(j as u32);
+                           ret.push(i as u32);
                             break;
                         }
                     }
@@ -570,13 +619,21 @@ impl block{
                 }
                 }
             }
-            let set: HashSet<u32> = retr.drain(..).collect(); // dedup
-            retr.extend(set.into_iter());
-            // retr.iter().unique();
-            retr
+
+            for (i, x) in array.iter_mut().enumerate(){
+                let p:u32=i as u32;
+                if ret.contains(&p){
+                    x.dead=true;
+                }
+            }
+           
            
             
         }
+
+     
+
+
     
     }
 
