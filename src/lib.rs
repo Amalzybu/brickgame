@@ -126,6 +126,7 @@ enum Direction{
     RIGHT
 }
 
+#[derive(Clone)]
 struct Explosion{
     body: Vec<u32>,
     count:u32,
@@ -138,6 +139,31 @@ impl Explosion{
             body: vec![pos,pos-2,pos+width-2,pos-width,pos+width+2,pos-width+3],
             count:0,
             rmv:false
+        }
+    }
+
+   
+    pub fn render(&mut self,width:u32){
+    if(self.count<=5){
+            self.count+=1;
+            if(self.count==1){
+                self.body= vec![self.body[0]-1,self.body[0]-6,self.body[0]+width-4,self.body[0]-width,self.body[0]+width+1,self.body[0]-width+3];
+            }
+            else if(self.count==2){
+                self.body= vec![self.body[0]+4,self.body[0]+2,self.body[0]+width-2,self.body[0]-width+6,self.body[0]+width-2,self.body[0]-width-8];
+            }
+            else if(self.count==3){
+                self.body= vec![self.body[0]+2,self.body[0]+1,self.body[0]+width-9,self.body[0]-width+2,self.body[0]+width-4,self.body[0]-width-2];
+            }
+            else if(self.count==4){
+                self.body= vec![self.body[0]-7,self.body[0]-3,self.body[0]+width-10,self.body[0]-width+5,self.body[0]+width-1,self.body[0]-width-3];
+            }
+            else if(self.count==5){
+                self.body= vec![self.body[0]+1,self.body[0]-5,self.body[0]+width-6,self.body[0]-width+2,self.body[0]+width,self.body[0]-width+3];
+            }
+        }
+        else{
+            self.rmv=true;
         }
     }
 }
@@ -449,7 +475,7 @@ impl block{
         for y in 0..uheight*uwidth{
         //    if(y%2==0){
            
-            if y/uwidth==0|| y%uwidth==0 ||y/uwidth==uheight-1||(y+1)%uwidth==0||((y+50)%uwidth==0&&y/uwidth<uheight-50){
+            if y/uwidth==0|| y%uwidth==0 ||y/uwidth==uheight-1||(y+1)%uwidth==0{
                 ar.push(Cell::Stone);
             }
             else{
@@ -460,15 +486,45 @@ impl block{
         //        ar.push(Cell::Alive);
         //    }
         }
-
+        let mut tank_array=Vec::<Tanker>::new();
+        let mut rng = rand::thread_rng();
+        let die = Uniform::from(((uwidth/3)*(uheight/3))..((uwidth/3)*(uheight/3)+(uwidth/3)));
+        // let die1 = Uniform::from(0..((uwidth/3)*(uheight/3)));
+        // let die2 = Uniform::from(0..((uwidth/3)*(uheight/3)));
+        // let die3 = Uniform::from(0..((uwidth/3)*(uheight/3)));
+        // let die4 = Uniform::from(0..((uwidth/3)*(uheight/3)));
+        for oo in 1..50{
+           
+            if(oo%5==0){
+                let throw = die.sample(&mut rng);
+                tank_array.push(Tanker::new(throw,uwidth as u32,uheight as u32,Direction::LEFT));
+            }
+            else if(oo%5==1){
+                let throw = die.sample(&mut rng);
+                tank_array.push(Tanker::new(throw+(uwidth*10),uwidth as u32,uheight as u32,Direction::RIGHT));
+            }
+            else if(oo%5==2){
+                let throw = die.sample(&mut rng);
+                tank_array.push(Tanker::new(throw+(uwidth*20),uwidth as u32,uheight as u32,Direction::LEFT));
+            }
+            else if(oo%5==3){
+                let throw = die.sample(&mut rng);
+                tank_array.push(Tanker::new(throw+(uwidth*30),uwidth as u32,uheight as u32,Direction::RIGHT));
+            }
+            else if(oo%5==4){
+                let throw = die.sample(&mut rng);
+                tank_array.push(Tanker::new(throw+(uwidth*40),uwidth as u32,uheight as u32,Direction::LEFT));
+            }
+           
+        }
+        
         Self{
             window:windows,
             canvas:canvass,
             width:uwidth as u32,
             height:uheight as u32,
             array:ar,
-            tanks:vec![Tanker::new(700,uwidth as u32,uheight as u32,Direction::LEFT),Tanker::new(2050,uwidth as u32,uheight as u32,Direction::RIGHT),Tanker::new(3050,uwidth as u32,uheight as u32,Direction::UP)
-                        ,Tanker::new(5000,uwidth as u32,uheight as u32,Direction::LEFT)],
+            tanks:tank_array,
             // tanks:vec![],
             hero:Tanker::new(600,uwidth as u32,uheight as u32,Direction::RIGHT),
             explosions:Vec::<Explosion>::new(),
@@ -485,9 +541,13 @@ impl block{
     collides_and_remove_tank(&mut self.tanks);
     
    let mut removal=Vec::<u32>::new();
+   let mut ex_removal=Vec::<u32>::new();
     // self.tanks.iter_mut().filter(|v|{ 
     //     v.dead
     // }).map(|mut v|{v}).collect::<Vec<_>>();
+
+   
+    // self.explosions.iter().filter(|v|{v.rmv}).map(|v|{v.cpy()}).collect::<Vec<_>>();
 
    for (i,item) in self.tanks.iter().enumerate(){
 
@@ -496,7 +556,8 @@ impl block{
                    console_log!("values tanks {}",item.body[0]);
                  self.array[*j as usize]=Cell::Dead;
                }
-               self.explosions.push(Explosion::new(item.body[0],self.width,self.height));
+               
+            self.explosions.push(Explosion::new(item.body[0],self.width,self.height));
             removal.push(i as u32);
         }
 
@@ -550,7 +611,30 @@ impl block{
         ik.tank_move(&self.array);
     }
 
-    for k in self.explosions.iter(){
+
+    for k in self.explosions.iter_mut(){
+      
+        for j in k.body.iter(){
+         //    console_log!("values tanks {}",*j);
+          self.array[*j as usize]=Cell::Dead;
+        }
+     // self.array[self.tanks[k].x]=Cell::Alive;
+     }
+
+     for (kex,ex) in self.explosions.iter().enumerate(){
+        if(ex.rmv){
+            ex_removal.push(kex as u32);
+        }
+    }
+
+    for (kex,i) in ex_removal.iter().enumerate(){
+        let ewww=i-kex as u32;
+        // console_log!("pppp j{} val{}",j,val);
+        self.explosions.remove(ewww as usize);
+    }
+
+    for k in self.explosions.iter_mut(){
+        k.render(self.width);
         for j in k.body.iter(){
          //    console_log!("values tanks {}",*j);
           self.array[*j as usize]=Cell::Alive;
@@ -596,7 +680,7 @@ impl block{
         fn collides_and_remove_tank(array:&mut Vec<Tanker>){
          
         let mut ret=Vec::<u32>::new();
-            for i in 0..array.len(){
+         for i in 0..array.len(){
               
              
                     
@@ -607,12 +691,22 @@ impl block{
                     let mut a=(array.get(i)).unwrap();
                     let mut b=(array.get(j)).unwrap();
                     // *b.dead=true;
-                    for pp in a.body.iter(){
+            'outer: for pp in a.body.iter(){
                         if(b.body.contains(pp)){
                             console_log!("collided");
                            ret.push(i as u32);
-                            break;
+                            break 'outer;
                         }
+
+                    'inner:for ui in b.bullet.iter(){
+
+                        if(ui.colum==*pp){
+                            ret.push(i as u32);
+                           break 'outer;
+
+                        }
+                     }   
+                    //    if(b.bullet.colum==pp){}
                     }
                   
                   
